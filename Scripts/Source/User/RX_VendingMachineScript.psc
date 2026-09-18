@@ -162,14 +162,12 @@ Event OnActivate(ObjectReference akActionRef)
 
 	; --- dispense ---
 	ObjectReference MachineRef = GetMachineRef()
-	ObjectReference AmmoRef = MachineRef.PlaceAtNode(sDropNodeName, tAmmo, iBuyAmmoCount, \
-		abInitiallyDisabled = true, abDeleteWhenAble = false)
+	ObjectReference AmmoRef = MachineRef.PlaceAtNode(sDropNodeName, tAmmo, iBuyAmmoCount, abInitiallyDisabled = true, abDeleteWhenAble = false)
 
 	if AmmoRef == None
 		; Mesh has no node by that name. Drop at an offset instead so the
 		; machine still works on any model.
-		AmmoRef = MachineRef.PlaceAtMe(tAmmo, iBuyAmmoCount, \
-			abInitiallyDisabled = true, abDeleteWhenAble = false)
+		AmmoRef = MachineRef.PlaceAtMe(tAmmo, iBuyAmmoCount, abInitiallyDisabled = true, abDeleteWhenAble = false)
 		if AmmoRef == None
 			; Nothing we can do - refund nothing, charge nothing.
 			ShowMsg(RX_NoDropNodeMsg)
@@ -180,8 +178,7 @@ Event OnActivate(ObjectReference akActionRef)
 		ShowMsg(RX_NoDropNodeMsg)
 	Endif
 
-	AmmoRef.MoveTo(AmmoRef, Utility.RandomFloat(-fBaseMoveRange, fBaseMoveRange), \
-		Utility.RandomFloat(-fBaseMoveRange, fBaseMoveRange), 0.0)
+	AmmoRef.MoveTo(AmmoRef, Utility.RandomFloat(-fBaseMoveRange, fBaseMoveRange), Utility.RandomFloat(-fBaseMoveRange, fBaseMoveRange), 0.0)
 	AmmoRef.SetAngle(Utility.RandomFloat(0.0, 360.0), 0.0, Utility.RandomFloat(0.0, 360.0))
 
 	if RX_MachineSound01
