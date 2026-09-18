@@ -20,6 +20,28 @@ python3 tools/papyrus_api.py verify <file.psc>      flag calls with no declarati
 `verify` is the useful one before a compile: it reports any call in your script
 that has no declaration anywhere in the indexed sources.
 
+## `setup-compiler.sh`
+
+Real compilation is possible in a Linux session — Wine 9.0 installs from the
+Ubuntu repos and executes Windows binaries here (verified). That upgrades
+checking from "every call has a declaration" to the compiler's own verdict:
+type errors, wrong arity, bad overrides, missing imports.
+
+The only piece that can't be fetched here is `PapyrusCompiler.exe`. Drop the
+CK's whole `Papyrus Compiler` folder (the exe plus its DLLs) and run:
+
+```
+tools/setup-compiler.sh "/path/to/PapyrusCompiler.exe" Scripts/Source/User/*.psc
+```
+
+`Institute_Papyrus_Flags.flg` is already in the extracted `Base.zip`, so no
+separate flags file is needed. Note the wine package does **not** put `wine` on
+`PATH` — the binary is at `/usr/lib/wine/wine64`.
+
+If the compiler turns out to be .NET, `apt-get install -y mono-complete`. If
+32-bit, `dpkg --add-architecture i386 && apt-get update && apt-get install -y
+wine32`. Both are available.
+
 ## Rebuilding the index
 
 It reads `reference/`, which is **gitignored** — those are Bethesda's and
