@@ -4,8 +4,29 @@ A remade, worldspace-friendly version of the AAV ammo vending machine scripts.
 
 | File | Goes on | Required? |
 |---|---|---|
-| `RH_VendingMachineScript.psc` | the thing the player activates | yes |
+| `RH_VendingMachineScript.psc` | the thing the player activates | yes (vanilla, no dependencies) |
+| `RH_VendingMachineScript_F4SE.psc` | same, *instead of* the above | only if you want weapon-mod-aware ammo |
 | `RH_VendingSwitchSpawnerScript.psc` | the machine ref | only for the spawner setup |
+
+## Vanilla vs F4SE
+
+The AAV original used `InstanceData:Owner` / `InstanceData.GetAmmo()`, which
+**is not in the vanilla Creation Kit sources** — a search of all 7,831 base
+`.psc` files finds no `InstanceData.psc` and not one reference to it. It comes
+from a script extender, so the original mod can't compile or run without one.
+
+That matters because the two lookups behave differently:
+
+- **Vanilla** (`GetEquippedWeapon().GetAmmo()`) reads the weapon's *base form*
+  ammo. A pipe gun converted from .45 to .38 by a receiver mod vends **.45**.
+- **Extender** (`InstanceData.GetAmmo()`) reads the *instanced* ammo, so the
+  same gun correctly vends **.38**.
+
+`RH_VendingMachineScript` uses the vanilla path, so it compiles with nothing but
+the CK and ships with no dependency. `RH_VendingMachineScript_F4SE` extends it
+and overrides the single `GetTargetAmmo()` function — everything else is
+inherited, so there's only one copy of the real logic. Use the F4SE variant only
+if ammo-converting weapon mods matter for your machine's placement.
 
 ## How it works
 
@@ -94,6 +115,22 @@ replacement token in the message text in the CK.
 - `fSaleCount` is now local instead of a script variable that outlived the call.
 - Optional round cap and cooldown.
 
+## Verified against the vanilla sources
+
+Every function, event and signature used by these scripts was checked against
+the Creation Kit's base `.psc` set. Things that got corrected in the process:
+
+- `AttachTo()` takes **only** a parent ref — there is no node-name overload.
+- `ObjectReference` has **no `Detach()`** at all; `Delete()` drops the
+  attachment.
+- `PlaceAtNode()` has no `abMatchRotation` parameter (`PlaceAtMe` doesn't
+  either) — the parameter list ends `..., abDeleteWhenAble, abAttach`.
+- `GetValue(ActorValue)` lives on `ObjectReference`, not `Actor`.
+- `GetLinkedRef(Keyword apKeyword = None)` already defaults its keyword, so a
+  separate no-argument branch is dead code.
+- `MoveTo`'s `abMatchRotation` defaults to **true**, not false.
+- `Math.Floor` returns `int`, and `Utility.GetCurrentRealTime()` does exist.
+
 ## Compiling
 
 Not compiled here — that needs the Creation Kit's Papyrus compiler and the
@@ -101,6 +138,8 @@ vanilla base scripts. Drop both `.psc` files in
 `Data\Scripts\Source\User\` and compile from the CK
 (**Gameplay → Papyrus Script Manager**) or with `PapyrusCompiler.exe`.
 
-`InstanceData:Owner` and `InstanceData.GetAmmo()` need the base game scripts
-extracted (they're in `Scripts.zip` in your `Data` folder) — if the compiler
-can't find `InstanceData`, that's what's missing.
+`RH_VendingMachineScript` needs nothing but the extracted base scripts.
+
+If you use `RH_VendingMachineScript_F4SE`, the compiler needs the extender's
+`InstanceData.psc` on its import path too. "Type InstanceData does not exist" at
+compile time means that import is missing — not that your base scripts are.

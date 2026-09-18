@@ -6,7 +6,13 @@ player's Charisma and Barter perks, and drops the rounds out of the machine.
 Attach this to EITHER:
   a) the vending machine reference itself, if the machine is an Activator, or
   b) a small hidden Activator placed in front of the machine, with its
-     Linked Ref pointing at the machine (see MachineRef resolution below).}
+     Linked Ref pointing at the machine (see MachineRef resolution below).
+
+This version is VANILLA ONLY - no script extender needed. It reads the ammo off
+the equipped weapon's base form, so a weapon whose ammo type was changed by a
+mod (a .38 receiver on a .45 pipe gun) vends the BASE ammo, not the converted
+ammo. If that matters, use RH_VendingMachineScript_F4SE instead, which overrides
+GetTargetAmmo() to read the instanced ammo.}
 
 ;------------------------------------------------------------------------------
 ; REQUIRED PROPERTIES
@@ -62,8 +68,8 @@ node, leave this as-is and the script falls back to the fDropOffset values.}
 float Property fFallbackMaxCaps = 500.0 Auto Const
 {Used only when RH_VendingAmmoPrice is empty.}
 
-int Property iWeaponSlotIndex = 41 Auto Const
-{Instance-owner slot for the equipped weapon. 41 on a standard setup.}
+int Property iEquipIndex = 0 Auto Const
+{Which equipped-weapon slot to read. 0 is the primary weapon.}
 
 float Property fBaseMoveRange = 5.0 Auto Const
 {Random scatter, in units, applied to the dropped ammo.}
@@ -118,8 +124,7 @@ Event OnActivate(ObjectReference akActionRef)
 	Endif
 
 	; --- what ammo does the equipped weapon take? ---
-	InstanceData:Owner InstanceWeapon = PlayerRef.GetInstanceOwner(iWeaponSlotIndex)
-	Ammo tAmmo = InstanceData.GetAmmo(InstanceWeapon)
+	Ammo tAmmo = GetTargetAmmo()
 
 	if tAmmo == None
 		ShowMsg(RH_NoAmmoUseMsg)
@@ -209,17 +214,24 @@ EndEvent
 ; Where the ammo comes out of. Linked ref if there is one (hidden-activator
 ; setup), otherwise ourselves (script straight on the machine).
 ObjectReference Function GetMachineRef()
-	ObjectReference kRef = None
-	if MachineLinkKeyword
-		kRef = GetLinkedRef(MachineLinkKeyword)
-	else
-		kRef = GetLinkedRef()
-	Endif
+	; GetLinkedRef's keyword parameter already defaults to None, so passing an
+	; empty property through is the same as the no-argument call.
+	ObjectReference kRef = GetLinkedRef(MachineLinkKeyword)
 
 	if kRef == None
 		kRef = Self as ObjectReference
 	Endif
 	Return kRef
+EndFunction
+
+; Overridden by RH_VendingMachineScript_F4SE to read instanced (weapon-mod
+; aware) ammo. Vanilla path: base form's ammo.
+Ammo Function GetTargetAmmo()
+	Weapon kWeapon = PlayerRef.GetEquippedWeapon(iEquipIndex)
+	if kWeapon == None
+		Return None
+	Endif
+	Return kWeapon.GetAmmo()
 EndFunction
 
 int Function GetMaxCaps()

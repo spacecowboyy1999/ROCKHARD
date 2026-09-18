@@ -80,7 +80,7 @@ Function ClearSwitch()
 		Return
 	Endif
 
-	SwitchRef.Detach()
+	; No Detach() exists on ObjectReference - Delete() drops the attachment.
 	SwitchRef.Disable()
 	SwitchRef.Delete()
 	SwitchRef = None
