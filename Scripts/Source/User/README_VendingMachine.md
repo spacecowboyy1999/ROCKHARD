@@ -5,10 +5,11 @@ A remade, worldspace-friendly version of the AAV ammo vending machine scripts.
 | File | Goes on | Required? |
 |---|---|---|
 | `RH_VendingMachineScript.psc` | the thing the player activates | yes (vanilla, no dependencies) |
-| `RH_VendingMachineScript_F4SE.psc` | same, *instead of* the above | only if you want weapon-mod-aware ammo |
+| `RH_VendingMachineScript_GOE.psc` | same, *instead of* the above | only if you want weapon-mod-aware ammo |
+| `RH_VendingMachineScript_F4SE.psc` | same, *instead of* the above | alternative to the GOE variant |
 | `RH_VendingSwitchSpawnerScript.psc` | the machine ref | only for the spawner setup |
 
-## Vanilla vs F4SE
+## Vanilla vs extender
 
 The AAV original used `InstanceData:Owner` / `InstanceData.GetAmmo()`, which
 **is not in the vanilla Creation Kit sources** — a search of all 7,831 base
@@ -23,10 +24,21 @@ That matters because the two lookups behave differently:
   same gun correctly vends **.38**.
 
 `RH_VendingMachineScript` uses the vanilla path, so it compiles with nothing but
-the CK and ships with no dependency. `RH_VendingMachineScript_F4SE` extends it
-and overrides the single `GetTargetAmmo()` function — everything else is
-inherited, so there's only one copy of the real logic. Use the F4SE variant only
-if ammo-converting weapon mods matter for your machine's placement.
+the CK and ships with no dependency. Both extender variants extend it and
+override the single `GetTargetAmmo()` function — everything else is inherited,
+so there's only one copy of the real logic.
+
+**Prefer `_GOE` over `_F4SE`.** Garden of Eden exposes
+`GardenOfEden.GetEquippedWeaponAmmo(Actor)` — one native call, no struct type and
+no equip-slot magic number — and its signature is verified against GOE's own
+source. The `_F4SE` variant's `InstanceData` / `GetInstanceOwner` are carried
+over from the AAV original unverified, because F4SE's script sources weren't
+available to check them against. They're in neither the vanilla set nor GOE's.
+
+One thing to test in-game rather than take on faith: GOE documents
+`GetEquippedWeaponAmmo` as "returns the Ammo of this actor's equipped weapon"
+without saying explicitly whether that's the instanced or base ammo. Put a
+converted receiver on a pipe gun and check which round drops.
 
 ## How it works
 
@@ -130,6 +142,14 @@ the Creation Kit's base `.psc` set. Things that got corrected in the process:
   separate no-argument branch is dead code.
 - `MoveTo`'s `abMatchRotation` defaults to **true**, not false.
 - `Math.Floor` returns `int`, and `Utility.GetCurrentRealTime()` does exist.
+- `InstanceData` / `GetInstanceOwner` are in **neither** the vanilla sources nor
+  Garden of Eden's — searched both.
+
+Re-run the check yourself any time:
+
+```
+python3 tools/papyrus_api.py verify Scripts/Source/User/RH_VendingMachineScript.psc
+```
 
 ## Compiling
 
