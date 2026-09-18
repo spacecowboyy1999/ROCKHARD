@@ -7,6 +7,12 @@ Scripts/Source/F4SE/
 Scripts.zip
 reference/
 
+# Bethesda's compiler binaries - reference only, not ours to redistribute.
+tools/PapyrusCompiler/
+
+# Build output.
+build/
+
 # Compiled output - rebuilt from source by the CK.
 *.pex
 

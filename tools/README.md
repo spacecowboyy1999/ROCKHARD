@@ -20,27 +20,53 @@ python3 tools/papyrus_api.py verify <file.psc>      flag calls with no declarati
 `verify` is the useful one before a compile: it reports any call in your script
 that has no declaration anywhere in the indexed sources.
 
-## `setup-compiler.sh`
+## `build.sh` — real compilation on Linux
 
-Real compilation is possible in a Linux session — Wine 9.0 installs from the
-Ubuntu repos and executes Windows binaries here (verified). That upgrades
-checking from "every call has a declaration" to the compiler's own verdict:
-type errors, wrong arity, bad overrides, missing imports.
-
-The only piece that can't be fetched here is `PapyrusCompiler.exe`. Drop the
-CK's whole `Papyrus Compiler` folder (the exe plus its DLLs) and run:
+Bethesda's toolchain runs here. `tools/build.sh` compiles the scripts to real
+`.pex`, verified by magic bytes (`FA57C0DE`) and a disassembly round-trip.
 
 ```
-tools/setup-compiler.sh "/path/to/PapyrusCompiler.exe" Scripts/Source/User/*.psc
+tools/build.sh                                  # everything
+tools/build.sh RH_VendingMachineScript.psc      # one file
 ```
 
-`Institute_Papyrus_Flags.flg` is already in the extracted `Base.zip`, so no
-separate flags file is needed. Note the wine package does **not** put `wine` on
-`PATH` — the binary is at `/usr/lib/wine/wine64`.
+### How it works
 
-If the compiler turns out to be .NET, `apt-get install -y mono-complete`. If
-32-bit, `dpkg --add-architecture i386 && apt-get update && apt-get install -y
-wine32`. Both are available.
+The toolchain is split across two binary formats, which is why one runtime
+isn't enough:
+
+| Stage | Binary | Format | Runtime |
+|---|---|---|---|
+| compile `.psc` → `.pas` | `PapyrusCompiler.exe` 2.8.0.4 | 32-bit .NET | `mono` |
+| assemble `.pas` → `.pex` | `PapyrusAssembler.exe` 2.7.0.2 | native win32 | 32-bit `wine` |
+
+So the compiler runs under mono with `-asmonly`, and wine assembles the result.
+`wine64` alone cannot run the assembler — Ubuntu's wine 9.0 has no working wow64,
+so the i386 loader at `/usr/lib/wine/wine` is required.
+
+### Environment setup (ephemeral container — redo each session)
+
+```
+apt-get update
+apt-get install -y --no-install-recommends mono-complete wine64
+dpkg --add-architecture i386 && apt-get update
+apt-get install -y --no-install-recommends libgd3:i386 libgphoto2-6t64:i386 wine32:i386
+```
+
+The i386 deps are listed explicitly because `wine32:i386` alone fails to resolve
+them. The wine packages do **not** put anything on `PATH`.
+
+### Gotchas worth keeping
+
+- The **assembler takes the object name without `.pas`**, resolved from the cwd.
+  `Name.pas` and `Z:\path\Name.pas` both fail with "Cannot open store for class".
+- **Import order matters.** F4SE ships *full replacements* of vanilla scripts
+  (its `Actor.psc` is vanilla's 1101 lines plus its own), so `reference/f4se`
+  must precede `reference` or its additions won't resolve.
+- `Institute_Papyrus_Flags.flg` ships inside the CK's `Base.zip`.
+- A nested `{ }` inside a Papyrus doc comment — e.g. documenting a message's
+  `{0}` token — silently terminates the comment and corrupts everything after
+  it. Only the real compiler catches this.
 
 ## Rebuilding the index
 

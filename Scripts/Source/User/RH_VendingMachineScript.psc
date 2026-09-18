@@ -47,13 +47,15 @@ Message Property RH_NoAmmoUseMsg Auto Const
 {"You have no weapon equipped that uses ammo."}
 
 Message Property RH_OverPriceMsg Auto Const
-{"This machine only accepts up to {0} caps." - takes 1 arg.}
+{Shown when a single round costs more than the machine accepts.
+Needs one replacement token in the message text for the caps limit.}
 
 Message Property RH_NoCapsMsg Auto Const
 {"You can't afford a single round."}
 
 Message Property RH_RemainCapsMsg Auto Const
-{"{0} caps were left in your pocket." - takes 1 arg. Shown once per load.}
+{Shown once per load when the machine capped your spend.
+Needs one replacement token in the message text for the leftover caps.}
 
 Message Property RH_NoDropNodeMsg Auto Const
 {Debug only. Shown if the drop node is missing and the offset fallback ran.}
