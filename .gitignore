@@ -1,0 +1,17 @@
+# Vanilla / third-party Papyrus sources are reference only - never commit them.
+# Redistributing Bethesda's script sources (or an extender's) isn't ours to do.
+Scripts/Source/Base/
+Scripts/Source/Vanilla/
+Scripts/Source/GEPE/
+Scripts/Source/F4SE/
+Scripts.zip
+reference/
+
+# Compiled output - rebuilt from source by the CK.
+*.pex
+
+# Packed archives
+*.ba2
+*.esp
+*.esm
+*.esl
