@@ -27,7 +27,7 @@ Bethesda's toolchain runs here. `tools/build.sh` compiles the scripts to real
 
 ```
 tools/build.sh                                  # everything
-tools/build.sh RH_VendingMachineScript.psc      # one file
+tools/build.sh RX_VendingMachineScript.psc      # one file
 ```
 
 ### How it works

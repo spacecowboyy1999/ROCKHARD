@@ -4,10 +4,10 @@ A remade, worldspace-friendly version of the AAV ammo vending machine scripts.
 
 | File | Goes on | Required? |
 |---|---|---|
-| `RH_VendingMachineScript.psc` | the thing the player activates | yes (vanilla, no dependencies) |
-| `RH_VendingMachineScript_GOE.psc` | same, *instead of* the above | only if you want weapon-mod-aware ammo |
-| `RH_VendingMachineScript_F4SE.psc` | same, *instead of* the above | alternative to the GOE variant |
-| `RH_VendingSwitchSpawnerScript.psc` | the machine ref | only for the spawner setup |
+| `RX_VendingMachineScript.psc` | the thing the player activates | yes (vanilla, no dependencies) |
+| `RX_VendingMachineScript_GOE.psc` | same, *instead of* the above | only if you want weapon-mod-aware ammo |
+| `RX_VendingMachineScript_F4SE.psc` | same, *instead of* the above | alternative to the GOE variant |
+| `RX_VendingSwitchSpawnerScript.psc` | the machine ref | only for the spawner setup |
 
 ## Vanilla vs extender
 
@@ -23,7 +23,7 @@ That matters because the two lookups behave differently:
 - **Extender** (`InstanceData.GetAmmo()`) reads the *instanced* ammo, so the
   same gun correctly vends **.38**.
 
-`RH_VendingMachineScript` uses the vanilla path, so it compiles with nothing but
+`RX_VendingMachineScript` uses the vanilla path, so it compiles with nothing but
 the CK and ships with no dependency. Both extender variants extend it and
 override the single `GetTargetAmmo()` function — everything else is inherited,
 so there's only one copy of the real logic.
@@ -56,7 +56,7 @@ barter pays roughly ammo value; a dumb one pays over triple.
 ## Setup A — machine is an Activator (simplest, recommended)
 
 1. Make your vending machine an **Activator** form.
-2. Put `RH_VendingMachineScript` on it, fill the properties.
+2. Put `RX_VendingMachineScript` on it, fill the properties.
 3. Place it in your worldspace. Done.
 
 `MachineRef` falls back to `Self` when there's no linked ref, so no second
@@ -66,9 +66,9 @@ object and no linking is needed.
 
 Statics can't run `OnActivate`, so the player needs something else to click.
 
-1. Make a small hidden Activator (`RH_VendingSwitchActi`) — collision-only
+1. Make a small hidden Activator (`RX_VendingSwitchActi`) — collision-only
    trigger-ish shape, no mesh or an invisible one.
-2. Put `RH_VendingMachineScript` on **the activator**.
+2. Put `RX_VendingMachineScript` on **the activator**.
 3. Place the activator in front of the machine in the CK, then set its
    **Linked Ref** to the machine reference.
 
@@ -77,8 +77,8 @@ The ammo then drops from the machine, not from the activator.
 ## Setup C — spawn the activator at runtime
 
 Same as B, but instead of placing and linking the activator by hand, put
-`RH_VendingSwitchSpawnerScript` on the **machine** reference and point its
-`RH_VendingSwitchActi` property at the activator. It spawns, links and attaches
+`RX_VendingSwitchSpawnerScript` on the **machine** reference and point its
+`RX_VendingSwitchActi` property at the activator. It spawns, links and attaches
 the switch on cell attach.
 
 **Why not the original's `OnWorkshopObjectPlaced`:** that event only fires for
@@ -96,7 +96,7 @@ be duplicated around at runtime.
   `"AmmoDropNode"`. Open your `.nif` in NifSkope and check the node names. If
   the node doesn't exist, `PlaceAtNode` returns `None` and the script falls back
   to `PlaceAtMe` + `fDropOffsetX/Y/Z`, so the machine still works on any model.
-- **`RH_VendingAmmoPrice`** — GlobalVariable, max caps taken per purchase. Leave
+- **`RX_VendingAmmoPrice`** — GlobalVariable, max caps taken per purchase. Leave
   it empty and `fFallbackMaxCaps` (500) is used.
 - **`iMaxRoundsPerPurchase`** — hard round cap, `0` = unlimited (original
   behaviour). Set it if the caps cap alone lets players buy 800 rounds of .38.
@@ -109,7 +109,7 @@ be duplicated around at runtime.
 
 ## Messages
 
-`RH_OverPriceMsg` and `RH_RemainCapsMsg` each take one argument, so add a
+`RX_OverPriceMsg` and `RX_RemainCapsMsg` each take one argument, so add a
 replacement token in the message text in the CK.
 
 ## Changes from the AAV original
@@ -148,7 +148,7 @@ the Creation Kit's base `.psc` set. Things that got corrected in the process:
 Re-run the check yourself any time:
 
 ```
-python3 tools/papyrus_api.py verify Scripts/Source/User/RH_VendingMachineScript.psc
+python3 tools/papyrus_api.py verify Scripts/Source/User/RX_VendingMachineScript.psc
 ```
 
 ## Compiling
@@ -158,8 +158,8 @@ vanilla base scripts. Drop both `.psc` files in
 `Data\Scripts\Source\User\` and compile from the CK
 (**Gameplay → Papyrus Script Manager**) or with `PapyrusCompiler.exe`.
 
-`RH_VendingMachineScript` needs nothing but the extracted base scripts.
+`RX_VendingMachineScript` needs nothing but the extracted base scripts.
 
-If you use `RH_VendingMachineScript_F4SE`, the compiler needs the extender's
+If you use `RX_VendingMachineScript_F4SE`, the compiler needs the extender's
 `InstanceData.psc` on its import path too. "Type InstanceData does not exist" at
 compile time means that import is missing — not that your base scripts are.

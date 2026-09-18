@@ -1,4 +1,4 @@
-ScriptName RH_VendingMachineScript Extends ObjectReference
+ScriptName RX_VendingMachineScript Extends ObjectReference
 {ROCKHARD - ammo vending machine.
 Sells ammo for the weapon the player currently has equipped, priced off the
 player's Charisma and Barter perks, and drops the rounds out of the machine.
@@ -11,7 +11,7 @@ Attach this to EITHER:
 This version is VANILLA ONLY - no script extender needed. It reads the ammo off
 the equipped weapon's base form, so a weapon whose ammo type was changed by a
 mod (a .38 receiver on a .45 pipe gun) vends the BASE ammo, not the converted
-ammo. If that matters, use RH_VendingMachineScript_F4SE instead, which overrides
+ammo. If that matters, use RX_VendingMachineScript_F4SE instead, which overrides
 GetTargetAmmo() to read the instanced ammo.}
 
 ;------------------------------------------------------------------------------
@@ -33,31 +33,31 @@ Perk Property CapCollector01 Auto Const
 Perk Property CapCollector02 Auto Const
 Perk Property PerkBobbleheadBarter Auto Const
 
-GlobalVariable Property RH_VendingAmmoPrice Auto Const
+GlobalVariable Property RX_VendingAmmoPrice Auto Const
 {Max caps the machine will take in one purchase. If left empty,
 fFallbackMaxCaps is used instead.}
 
-Sound Property RH_MachineSound01 Auto Const
+Sound Property RX_MachineSound01 Auto Const
 {Vend / clunk sound. Plays on the machine.}
 
 Keyword Property MachineLinkKeyword Auto Const
 {Optional keyword for GetLinkedRef, if you use keyworded linked refs.}
 
-Message Property RH_NoAmmoUseMsg Auto Const
+Message Property RX_NoAmmoUseMsg Auto Const
 {"You have no weapon equipped that uses ammo."}
 
-Message Property RH_OverPriceMsg Auto Const
+Message Property RX_OverPriceMsg Auto Const
 {Shown when a single round costs more than the machine accepts.
 Needs one replacement token in the message text for the caps limit.}
 
-Message Property RH_NoCapsMsg Auto Const
+Message Property RX_NoCapsMsg Auto Const
 {"You can't afford a single round."}
 
-Message Property RH_RemainCapsMsg Auto Const
+Message Property RX_RemainCapsMsg Auto Const
 {Shown once per load when the machine capped your spend.
 Needs one replacement token in the message text for the leftover caps.}
 
-Message Property RH_NoDropNodeMsg Auto Const
+Message Property RX_NoDropNodeMsg Auto Const
 {Debug only. Shown if the drop node is missing and the offset fallback ran.}
 
 ;------------------------------------------------------------------------------
@@ -68,7 +68,7 @@ string Property sDropNodeName = "AmmoDropNode" Auto Const
 node, leave this as-is and the script falls back to the fDropOffset values.}
 
 float Property fFallbackMaxCaps = 500.0 Auto Const
-{Used only when RH_VendingAmmoPrice is empty.}
+{Used only when RX_VendingAmmoPrice is empty.}
 
 int Property iEquipIndex = 0 Auto Const
 {Which equipped-weapon slot to read. 0 is the primary weapon.}
@@ -129,7 +129,7 @@ Event OnActivate(ObjectReference akActionRef)
 	Ammo tAmmo = GetTargetAmmo()
 
 	if tAmmo == None
-		ShowMsg(RH_NoAmmoUseMsg)
+		ShowMsg(RX_NoAmmoUseMsg)
 		Release()
 		Return
 	Endif
@@ -138,11 +138,11 @@ Event OnActivate(ObjectReference akActionRef)
 	int iAmmoPrice = GetRoundPrice(tAmmo)
 
 	if iAmmoPrice > iMaxCaps
-		ShowMsg(RH_OverPriceMsg, iMaxCaps as float)
+		ShowMsg(RX_OverPriceMsg, iMaxCaps as float)
 		Release()
 		Return
 	elseif iAmmoPrice > iBuyCaps
-		ShowMsg(RH_NoCapsMsg)
+		ShowMsg(RX_NoCapsMsg)
 		Release()
 		Return
 	Endif
@@ -153,7 +153,7 @@ Event OnActivate(ObjectReference akActionRef)
 	Endif
 
 	if iBuyAmmoCount < 1
-		ShowMsg(RH_NoCapsMsg)
+		ShowMsg(RX_NoCapsMsg)
 		Release()
 		Return
 	Endif
@@ -172,20 +172,20 @@ Event OnActivate(ObjectReference akActionRef)
 			abInitiallyDisabled = true, abDeleteWhenAble = false)
 		if AmmoRef == None
 			; Nothing we can do - refund nothing, charge nothing.
-			ShowMsg(RH_NoDropNodeMsg)
+			ShowMsg(RX_NoDropNodeMsg)
 			Release()
 			Return
 		Endif
 		AmmoRef.MoveTo(MachineRef, fDropOffsetX, fDropOffsetY, fDropOffsetZ)
-		ShowMsg(RH_NoDropNodeMsg)
+		ShowMsg(RX_NoDropNodeMsg)
 	Endif
 
 	AmmoRef.MoveTo(AmmoRef, Utility.RandomFloat(-fBaseMoveRange, fBaseMoveRange), \
 		Utility.RandomFloat(-fBaseMoveRange, fBaseMoveRange), 0.0)
 	AmmoRef.SetAngle(Utility.RandomFloat(0.0, 360.0), 0.0, Utility.RandomFloat(0.0, 360.0))
 
-	if RH_MachineSound01
-		RH_MachineSound01.Play(MachineRef)
+	if RX_MachineSound01
+		RX_MachineSound01.Play(MachineRef)
 	Endif
 
 	AmmoRef.Enable()
@@ -196,7 +196,7 @@ Event OnActivate(ObjectReference akActionRef)
 	if !bIsNotFirstBuy
 		bIsNotFirstBuy = true
 		if iOriginCaps > iBuyCaps
-			ShowMsg(RH_RemainCapsMsg, (iOriginCaps - iBuyCaps) as float)
+			ShowMsg(RX_RemainCapsMsg, (iOriginCaps - iBuyCaps) as float)
 		Endif
 	Endif
 
@@ -226,7 +226,7 @@ ObjectReference Function GetMachineRef()
 	Return kRef
 EndFunction
 
-; Overridden by RH_VendingMachineScript_F4SE to read instanced (weapon-mod
+; Overridden by RX_VendingMachineScript_F4SE to read instanced (weapon-mod
 ; aware) ammo. Vanilla path: base form's ammo.
 Ammo Function GetTargetAmmo()
 	Weapon kWeapon = PlayerRef.GetEquippedWeapon(iEquipIndex)
@@ -237,8 +237,8 @@ Ammo Function GetTargetAmmo()
 EndFunction
 
 int Function GetMaxCaps()
-	if RH_VendingAmmoPrice
-		Return RH_VendingAmmoPrice.GetValueInt()
+	if RX_VendingAmmoPrice
+		Return RX_VendingAmmoPrice.GetValueInt()
 	Endif
 	Return fFallbackMaxCaps as int
 EndFunction

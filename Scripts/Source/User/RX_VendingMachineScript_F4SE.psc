@@ -1,7 +1,7 @@
-ScriptName RH_VendingMachineScript_F4SE Extends RH_VendingMachineScript
+ScriptName RX_VendingMachineScript_F4SE Extends RX_VendingMachineScript
 {ROCKHARD - F4SE variant of the ammo vending machine.
 
-REQUIRES F4SE's script sources. Prefer RH_VendingMachineScript_GOE over this
+REQUIRES F4SE's script sources. Prefer RX_VendingMachineScript_GOE over this
 one - it does the same job in a single verified call.
 
 Use this only if you want the machine to respect weapon mods that change a
@@ -9,7 +9,7 @@ weapon's ammo type and you'd rather depend on F4SE than on Garden of Eden - a pi
 converted from .45 to .38 vends .38 here, where the vanilla script vends .45.
 
 Everything else (pricing, dispensing, properties, setup) is inherited from
-RH_VendingMachineScript unchanged. Attach this in its place and fill the same
+RX_VendingMachineScript unchanged. Attach this in its place and fill the same
 properties.
 
 InstanceData / GetInstanceOwner are NOT in the vanilla Creation Kit sources, and

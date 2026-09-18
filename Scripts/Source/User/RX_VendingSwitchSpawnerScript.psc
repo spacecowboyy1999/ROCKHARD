@@ -1,11 +1,11 @@
-ScriptName RH_VendingSwitchSpawnerScript Extends ObjectReference
+ScriptName RX_VendingSwitchSpawnerScript Extends ObjectReference
 {ROCKHARD - optional helper for the ammo vending machine.
 
 Only needed if your machine is a Static/Furniture (which can't run OnActivate)
 and you'd rather the hidden activator be spawned at runtime than placed by hand
 in the Creation Kit.
 
-Put this on the MACHINE reference. It spawns RH_VendingSwitchActi, links it back
+Put this on the MACHINE reference. It spawns RX_VendingSwitchActi, links it back
 to the machine, and attaches it to the mesh.
 
 Note: the AAV original did this from OnWorkshopObjectPlaced, which only ever
@@ -13,8 +13,8 @@ fires for settlement-built objects. A machine placed in a worldspace never gets
 that event, so this version hooks OnInit / OnCellAttach instead - and keeps the
 workshop events too, in case you later make the machine buildable.}
 
-Activator Property RH_VendingSwitchActi Auto Const Mandatory
-{The hidden activator carrying RH_VendingMachineScript.}
+Activator Property RX_VendingSwitchActi Auto Const Mandatory
+{The hidden activator carrying RX_VendingMachineScript.}
 
 bool Property bAttachToMesh = true Auto Const
 {Off = the switch is left free-standing at the machine's origin instead of
@@ -63,7 +63,7 @@ Function SpawnSwitch()
 		Return
 	Endif
 
-	SwitchRef = PlaceAtMe(RH_VendingSwitchActi, 1, abDeleteWhenAble = false)
+	SwitchRef = PlaceAtMe(RX_VendingSwitchActi, 1, abDeleteWhenAble = false)
 	if SwitchRef == None
 		Return
 	Endif
